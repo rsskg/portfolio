@@ -155,7 +155,7 @@ temp_watermark.seek(0)
 self.image_watermark.save(watermark_filename, ContentFile(temp_watermark.read()), save=True)
 temp_watermark.close()
 
-# парсер из Дизеля
+# парсер из старого Дизеля
     base_url = 'http://diesel.elcat.kg/?showforum='+self.sp+'&st=%s'
     diesel = []
     for url in [base_url % i for i in range(0, 200, 40)]:
