@@ -92,3 +92,65 @@ def thumb(git):
     form = FormDemir(request.POST)
     obj.demir = str(go_pay)
     obj.save()
+
+# убираем фон в PNG
+def create(self, image, geometry, options):
+    im = super(Engine, self).create(image, geometry, options)
+    if options.get('background'):
+        try:
+            background = Image.new('RGB', im.size, ImageColor.getcolor(options.get('background'), 'RGB'))
+            background.paste(im, mask=im.split()[3])  # 3 is the alpha of an RGBA image.
+            return background
+        except Exception:
+            return im
+    return im
+
+#счетчик посещений
+def PostLogCount():
+    os.rename(STATIC_ROOT + "/real.log", STATIC_ROOT + "/real_.log")
+    RealLog = open(STATIC_ROOT + "/real_.log","r")
+    for linelog in RealLog.readlines():
+        real = Real.objects.get(id=linelog)
+        if real:
+           real.displays = story.displays + 1
+        real.save()
+    RealLog.close
+    os.remove(STATIC_ROOT + "/real_.log")
+
+#watermark
+fh = storage.open(self.image.name, 'r')
+img = PIL.Image.open(fh)
+watermark_name, watermark_extension = os.path.splitext(self.image.name)
+watermark_extension = watermark_extension.lower()
+watermark_filename = watermark_name + '_watermark' + watermark_extension
+
+if watermark_extension in ['.jpg', '.jpeg']:
+    FTYPE = 'JPEG'
+elif watermark_extension == '.gif':
+    FTYPE = 'GIF'
+elif watermark_extension == '.png':
+    FTYPE = 'PNG'
+else:
+    return False  # Unrecognized file type
+
+width, height = img.size
+draw = PIL.ImageDraw.Draw(img)
+font = PIL.ImageFont.truetype(_font_as_bytes(), 13)
+text = [u"Бишкек, Медерова", u"hotel.kg", u"+996 779 99 99 99"]
+
+for num, line in enumerate(text):
+    textwidth, textheight = draw.textsize(line, font)
+
+    margin = 15
+    x = width - textwidth - margin
+    y = height - textheight - margin * num
+
+    draw.text((x - 1, y - 11), line, font=font, fill='#3b4947')
+    draw.text((x, y - 10), line, font=font, fill='#fff')
+
+temp_watermark = StringIO()
+img.save(temp_watermark, FTYPE)
+temp_watermark.seek(0)
+
+self.image_watermark.save(watermark_filename, ContentFile(temp_watermark.read()), save=True)
+temp_watermark.close()
