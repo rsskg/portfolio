@@ -154,3 +154,30 @@ temp_watermark.seek(0)
 
 self.image_watermark.save(watermark_filename, ContentFile(temp_watermark.read()), save=True)
 temp_watermark.close()
+
+# парсер из Дизеля
+    base_url = 'http://diesel.elcat.kg/?showforum='+self.sp+'&st=%s'
+    diesel = []
+    for url in [base_url % i for i in range(0, 200, 40)]:
+        r = requests.get(url)
+        parsed_body = lxml.html.fromstring(r.text)
+        parse_main_path = '//body//table[contains(@class, "ipbtable")]//tr[position()>12]'
+        href = parsed_body.xpath(parse_main_path+'//td[3]//span//a/@href')
+        text = parsed_body.xpath(parse_main_path+'//td[3]//span//a/text()')
+        span = parsed_body.xpath(parse_main_path+'//td[3]//div[@class="desc"]//span/text()')
+        name = parsed_body.xpath(parse_main_path+'//td[5]//a/text()')
+        data = zip(href, text, span, name)
+        dd = []
+        for n in data:
+            href0 = n[0]
+            text0 = n[1].decode("utf-8")
+            span0 = n[2].decode("utf-8")
+            name0 = n[3].decode("utf-8")
+            rm = self.model.objects.filter(user=self.request.user).values_list('tt', flat=True)
+            if name0 not in rm:
+                dict0 = dict(href=href0, text=text0, span=span0, name=name0)
+            else:
+                dict0 = {}
+            dd.append(dict0)
+        diesel.append(dd)
+        flag = True
